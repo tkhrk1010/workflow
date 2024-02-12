@@ -67,17 +67,43 @@ const AddColumnButton = styled.button`
   }
 `;
 
+const ArrowColumn = styled.div`
+  width: 50px; // または適切な幅
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 8px;
+`;
+
+const ArrowIcon = styled.div`
+  font-size: 24px; // 矢印のサイズ
+  color: #ccc; // 矢印の色
+`;
+
 
 const Workflow = () => {
   // State to maintain the list of blocks in each column
-  const [columns, setColumns] = useState([['Sales'], ['sale'], ['Customer Support']]);
+  const [columns, setColumns] = useState([
+    { type: 'block', blocks: ['Sales'] },
+    { type: 'arrow' }, 
+    { type: 'block', blocks: ['Sale'] },
+    { type: 'arrow' },
+    { type: 'block', blocks: ['Customer Support'] },
+  ]);
+  
 
   // Function to add a new block below the clicked block
   const addBlock = (columnIndex, blockIndex) => {
     const newColumns = [...columns];
-    // Insert a new block just below the clicked one
-    newColumns[columnIndex].splice(blockIndex + 1, 0, 'New Block');
-    setColumns(newColumns);
+    // Ensure the column is of type 'block' before attempting to add a block
+    if (newColumns[columnIndex].type === 'block') {
+      // Correctly access the blocks array within the column object
+      let newBlocks = [...newColumns[columnIndex].blocks];
+      newBlocks.splice(blockIndex + 1, 0, 'New Block');
+      newColumns[columnIndex].blocks = newBlocks;
+      setColumns(newColumns);
+    }
   };
   
 
@@ -91,52 +117,73 @@ const Workflow = () => {
   const handleDrop = (e, targetColumnIndex, targetBlockIndex) => {
     const sourceColumnIndex = e.dataTransfer.getData('columnIndex');
     const sourceBlockIndex = e.dataTransfer.getData('blockIndex');
-    const newColumns = [...columns];
-    const blockToMove = newColumns[sourceColumnIndex][sourceBlockIndex];
-    newColumns[sourceColumnIndex].splice(sourceBlockIndex, 1);
-    newColumns[targetColumnIndex].splice(targetBlockIndex + 1, 0, blockToMove);
-    setColumns(newColumns);
+  
+    // Ensure both source and target columns are of type 'block'
+    if (columns[sourceColumnIndex].type === 'block' && columns[targetColumnIndex].type === 'block') {
+      const newColumns = [...columns];
+      // Use a temporary variable to hold the block being moved
+      const blockToMove = newColumns[sourceColumnIndex].blocks[sourceBlockIndex];
+      // Remove the block from the source column
+      newColumns[sourceColumnIndex].blocks.splice(sourceBlockIndex, 1);
+      // Insert the block into the target column
+      newColumns[targetColumnIndex].blocks.splice(targetBlockIndex + 1, 0, blockToMove);
+      setColumns(newColumns);
+    }
   };
+  
 
   // Function to handle double click on block
   const handleDoubleClick = (columnIndex, blockIndex) => {
     const newColumns = [...columns];
-    const newBlockText = prompt('Enter new text for the block:');
-    if (newBlockText !== null) {
-      newColumns[columnIndex][blockIndex] = newBlockText;
-      setColumns(newColumns);
+    // ダブルクリックされたColumnがblockタイプであることを確認
+    if (newColumns[columnIndex].type === 'block') {
+      const newBlockText = prompt('Enter new text for the block:');
+      if (newBlockText !== null) {
+        // blocks配列内の特定のブロックテキストを更新
+        newColumns[columnIndex].blocks[blockIndex] = newBlockText;
+        setColumns(newColumns);
+      }
     }
   };
+  
 
   const addColumn = () => {
-    setColumns([...columns, []]); // Add a new empty column
+    setColumns([...columns, { type: 'arrow' }, { type: 'block', blocks: [] }]);
   };
   
 
   return (
     <Container>
       <WorkflowArea>
-        {columns.map((blocks, columnIndex) => (
-          <Column key={columnIndex}>
-            {blocks.map((block, blockIndex) => (
-              <React.Fragment key={blockIndex}>
-                <Block
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, columnIndex, blockIndex)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => handleDrop(e, columnIndex, blockIndex)}
-                  onDoubleClick={() => handleDoubleClick(columnIndex, blockIndex)}
-                >
-                  {block}
-                </Block>
-                {/* Render an arrow below each block except the last one */}
-                {blockIndex < blocks.length - 1 && <Arrow />}
-              </React.Fragment>
-            ))}
-            {/* Add HoverArrow below the last block of each column */}
-            <HoverArrow onClick={() => addBlock(columnIndex, blocks.length - 1)} />
-          </Column>
-        ))}
+        {columns.map((column, index) => {
+          if (column.type === 'block') {
+            return (
+              <Column key={`block-${index}`}>
+                {column.blocks.map((block, blockIndex) => (
+                  <React.Fragment key={blockIndex}>
+                    <Block
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index, blockIndex)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, index, blockIndex)}
+                      onDoubleClick={() => handleDoubleClick(index, blockIndex)}
+                    >
+                      {block}
+                    </Block>
+                    {blockIndex < column.blocks.length - 1 && <Arrow />}
+                  </React.Fragment>
+                ))}
+                <HoverArrow onClick={() => addBlock(index, column.blocks.length - 1)} />
+              </Column>
+            );
+          } else if (column.type === 'arrow') {
+            return (
+              <ArrowColumn key={`arrow-${index}`}>
+                <ArrowIcon>→</ArrowIcon> {/* 今後変更可能 */}
+              </ArrowColumn>
+            );
+          }
+        })}
         <AddColumnButton onClick={addColumn}>Add Column</AddColumnButton>
       </WorkflowArea>
     </Container>
