@@ -73,7 +73,7 @@ const Workflow = () => {
     const newColumns = [...columns];
     const blockToMove = newColumns[sourceColumnIndex][sourceBlockIndex];
     newColumns[sourceColumnIndex].splice(sourceBlockIndex, 1);
-    newColumns[targetColumnIndex].splice(targetBlockIndex, 0, blockToMove);
+    newColumns[targetColumnIndex].splice(targetBlockIndex + 1, 0, blockToMove);
     setColumns(newColumns);
   };
 
