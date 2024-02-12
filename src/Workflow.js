@@ -77,6 +77,16 @@ const Workflow = () => {
     setColumns(newColumns);
   };
 
+  // Function to handle double click on block
+  const handleDoubleClick = (columnIndex, blockIndex) => {
+    const newColumns = [...columns];
+    const newBlockText = prompt('Enter new text for the block:');
+    if (newBlockText !== null) {
+      newColumns[columnIndex][blockIndex] = newBlockText;
+      setColumns(newColumns);
+    }
+  };
+
   return (
     <Container>
       <WorkflowArea>
@@ -90,6 +100,7 @@ const Workflow = () => {
                   onDragStart={(e) => handleDragStart(e, columnIndex, blockIndex)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => handleDrop(e, columnIndex, blockIndex)}
+                  onDoubleClick={() => handleDoubleClick(columnIndex, blockIndex)}
                 >
                   {block}
                 </Block>
