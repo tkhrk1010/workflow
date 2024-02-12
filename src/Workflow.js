@@ -54,6 +54,20 @@ const HoverArrow = styled(Arrow)`
   }
 `;
 
+const AddColumnButton = styled.button`
+  padding: 8px 16px;
+  margin-left: auto; // Ensure it aligns to the right
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+
 const Workflow = () => {
   // State to maintain the list of blocks in each column
   const [columns, setColumns] = useState([['Sales'], ['sale'], ['Customer Support']]);
@@ -94,6 +108,11 @@ const Workflow = () => {
     }
   };
 
+  const addColumn = () => {
+    setColumns([...columns, []]); // Add a new empty column
+  };
+  
+
   return (
     <Container>
       <WorkflowArea>
@@ -118,6 +137,7 @@ const Workflow = () => {
             <HoverArrow onClick={() => addBlock(columnIndex, blocks.length - 1)} />
           </Column>
         ))}
+        <AddColumnButton onClick={addColumn}>Add Column</AddColumnButton>
       </WorkflowArea>
     </Container>
   );
