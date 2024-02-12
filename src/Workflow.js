@@ -60,6 +60,23 @@ const Workflow = () => {
     setColumns(newColumns);
   };
 
+  // Function to handle drag start
+  const handleDragStart = (e, columnIndex, blockIndex) => {
+    e.dataTransfer.setData('columnIndex', columnIndex);
+    e.dataTransfer.setData('blockIndex', blockIndex);
+  };
+
+  // Function to handle drop
+  const handleDrop = (e, targetColumnIndex, targetBlockIndex) => {
+    const sourceColumnIndex = e.dataTransfer.getData('columnIndex');
+    const sourceBlockIndex = e.dataTransfer.getData('blockIndex');
+    const newColumns = [...columns];
+    const blockToMove = newColumns[sourceColumnIndex][sourceBlockIndex];
+    newColumns[sourceColumnIndex].splice(sourceBlockIndex, 1);
+    newColumns[targetColumnIndex].splice(targetBlockIndex, 0, blockToMove);
+    setColumns(newColumns);
+  };
+
   return (
     <Container>
       <WorkflowArea>
@@ -67,7 +84,15 @@ const Workflow = () => {
           <Column key={columnIndex}>
             {blocks.map((block, blockIndex) => (
               <React.Fragment key={blockIndex}>
-                <Block onClick={() => addBlock(columnIndex)}>{block}</Block>
+                <Block
+                  onClick={() => addBlock(columnIndex)}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, columnIndex, blockIndex)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handleDrop(e, columnIndex, blockIndex)}
+                >
+                  {block}
+                </Block>
                 {/* Render an arrow below each block except the last one */}
                 {blockIndex < blocks.length - 1 && <Arrow />}
               </React.Fragment>
