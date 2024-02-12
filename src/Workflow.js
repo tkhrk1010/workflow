@@ -40,12 +40,8 @@ const Arrow = styled.div`
   align-items: center;
   justify-content: center;
   &:after {
-    content: '';
-    display: block;
-    margin: auto;
-    width: 2px;
-    height: 100%;
-    background: #ccc;
+    content: '↓';
+    font-size: 20px;
   }
 `;
 
