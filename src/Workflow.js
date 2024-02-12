@@ -45,16 +45,27 @@ const Arrow = styled.div`
   }
 `;
 
+const HoverArrow = styled(Arrow)`
+  opacity: 0; // Initially invisible
+  transition: opacity 0.3s ease-in-out;
+
+  &:hover {
+    opacity: 0.5; // Visible and slightly transparent on hover
+  }
+`;
+
 const Workflow = () => {
   // State to maintain the list of blocks in each column
   const [columns, setColumns] = useState([['Sales'], ['sale'], ['Customer Support']]);
 
   // Function to add a new block below the clicked block
-  const addBlock = (columnIndex) => {
+  const addBlock = (columnIndex, blockIndex) => {
     const newColumns = [...columns];
-    newColumns[columnIndex].push('New Block');
+    // Insert a new block just below the clicked one
+    newColumns[columnIndex].splice(blockIndex + 1, 0, 'New Block');
     setColumns(newColumns);
   };
+  
 
   // Function to handle drag start
   const handleDragStart = (e, columnIndex, blockIndex) => {
@@ -91,7 +102,6 @@ const Workflow = () => {
             {blocks.map((block, blockIndex) => (
               <React.Fragment key={blockIndex}>
                 <Block
-                  onClick={() => addBlock(columnIndex)}
                   draggable
                   onDragStart={(e) => handleDragStart(e, columnIndex, blockIndex)}
                   onDragOver={(e) => e.preventDefault()}
@@ -104,6 +114,8 @@ const Workflow = () => {
                 {blockIndex < blocks.length - 1 && <Arrow />}
               </React.Fragment>
             ))}
+            {/* Add HoverArrow below the last block of each column */}
+            <HoverArrow onClick={() => addBlock(columnIndex, blocks.length - 1)} />
           </Column>
         ))}
       </WorkflowArea>
